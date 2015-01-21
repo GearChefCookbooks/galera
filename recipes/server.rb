@@ -203,7 +203,7 @@ if cluster_ready:
   sync_host = init_host
 
   end
-else:
+else
 
   Chef::Log.warn "***********************************"
   Chef::Log.warn "There are no nodes found for the cluster ..."
