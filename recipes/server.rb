@@ -189,7 +189,7 @@ cluster_ready,members = Chef::ResourceDefinitionList::NodesHelper.cluster_member
 
 my_ip = node['ipaddress']
 
-if cluster_ready:
+if cluster_ready
   hosts = []
   members.each do |member|
     ipaddress = member["ipaddress"]
@@ -197,12 +197,12 @@ if cluster_ready:
     hostname = member["hostname"]
     port = member["port"]
     hosts << ipaddress
+  end
 
   #For the init host, we take the first node of the array
   init_host = hosts[0]
   sync_host = init_host
 
-  end
 else
 
   Chef::Log.warn "***********************************"
