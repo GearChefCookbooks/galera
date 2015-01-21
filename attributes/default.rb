@@ -125,3 +125,6 @@ default['wsrep']['sst_method'] = "rsync"
 # Depends on SST method. For mysqldump method it is wsrep_sst:<wsrep password>
 default['wsrep']['sst_auth'] = default['wsrep']['user'] + ":" + default['wsrep']['password']
 
+#########################################
+
+default["shared"]["config"]["nodes_file"] = "/etc/galera_nodes.conf"
