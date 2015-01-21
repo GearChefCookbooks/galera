@@ -17,6 +17,14 @@
 # limitations under the License.
 #
 
+e = execute "apt-get update" do
+  action :nothing
+end
+
+if node['platform'] == "ubuntu"
+  e.run_action(:run)
+end
+
 # Vagrant host only fix
 Ohai::Config[:plugin_path] << node['vagrant-ohai']['plugin_path']
 Chef::Log.info("vagrant ohai plugins will be at: #{node['vagrant-ohai']['plugin_path']}")
