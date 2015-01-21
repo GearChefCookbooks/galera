@@ -204,8 +204,21 @@ if cluster_ready:
 
   end
 else:
+
+  Chef::Log.warn "***********************************"
   Chef::Log.warn "There are no nodes found for the cluster ..."
+  Chef::Log.warn "File exit status set at 185 ..."
+  Chef::Log.warn "***********************************"
+
+  file "/tmp/file_exit_status" do
+    content "185"
+    owner 'root'
+    group 'root'
+    mode '444'
+  end
+
   hosts = nil
+
 end
 
 Chef::Log.info "init_host = #{init_host}, my_ip = #{my_ip}, hosts = #{hosts}"
