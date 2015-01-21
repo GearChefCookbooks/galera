@@ -224,7 +224,7 @@ else
   #  group 'root'
   #  mode '444'
 
-  end
+  #end
 
   hosts = nil
 
