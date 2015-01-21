@@ -182,11 +182,32 @@ template "my.cnf" do
 #  notifies :restart, "service[mysql]", :delayed
 end
 
-my_ip = node['ipaddress']
-init_host = node["galera"]['init_node']
-sync_host = init_host
+Chef::Log.info "Configuring cluster specified in yml file ..."
 
-hosts = node["galera"]['nodes']
+#Making a libary call to read yml file and see if there are any members
+cluster_ready,members = Chef::ResourceDefinitionList::NodesHelper.cluster_members(node)
+
+my_ip = node['ipaddress']
+
+if cluster_ready:
+  hosts = []
+  members.each do |member|
+    ipaddress = member["ipaddress"]
+    fqdn = member["fqdn"]
+    hostname = member["hostname"]
+    port = member["port"]
+    hosts << ipaddress
+
+  #For the init host, we take the first node of the array
+  init_host = hosts[0]
+  sync_host = init_host
+
+  end
+else:
+  Chef::Log.warn "There are no nodes found for the cluster ..."
+  hosts = nil
+end
+
 Chef::Log.info "init_host = #{init_host}, my_ip = #{my_ip}, hosts = #{hosts}"
 if File.exists?("#{install_flag}") && hosts != nil && hosts.length > 0
   i = 0
