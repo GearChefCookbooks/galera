@@ -23,6 +23,15 @@ class Chef::ResourceDefinitionList::NodesHelper
 
     unless instances.nil?
       instances.each do |name, instance|
+        cluster_name = instance["cluster"]+"_"+instance["instance"]
+        if cluster_name.nil?
+          cluster_name = new_cluster_name
+        else
+          if cluster_name != new_cluster_name
+            Chef::Log.error "This name has a different cluster name than the prior node"
+          end
+        end
+
         member = Chef::Node.new
         member.name(name)
         member.default['fqdn'] = instance["ipaddresses"]["private"]
@@ -36,7 +45,7 @@ class Chef::ResourceDefinitionList::NodesHelper
     #We want at least 1 node to create a cluster or a basis for a cluster
     members.empty? ? cluster_ready = false : cluster_ready = true
 
-    return cluster_ready,members
+    return cluster_ready,cluster_name,members
 
   end
 
