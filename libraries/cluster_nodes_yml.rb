@@ -44,6 +44,7 @@ class Chef::ResourceDefinitionList::NodesHelper
 
     #We want at least 1 node to create a cluster or a basis for a cluster
     members.empty? ? cluster_ready = false : cluster_ready = true
+    members.empty? ? cluster_name = false : cluster_name = true
 
     return cluster_ready,cluster_name,members
 
