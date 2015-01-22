@@ -194,7 +194,6 @@ Chef::Log.info "Configuring cluster specified in yml file ..."
 
 #Making a libary call to read yml file and see if there are any members
 cluster_ready,cluster_name,members = Chef::ResourceDefinitionList::NodesHelper.cluster_members(node)
-
 node.override['wsrep']['cluster_name'] = cluster_name
 
 my_ip = node['ipaddress']
