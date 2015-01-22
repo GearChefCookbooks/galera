@@ -12,6 +12,8 @@ class Chef::ResourceDefinitionList::NodesHelper
 
   def self.cluster_members(node)
 
+    cluster_name = nil
+
     begin
        instances = self.read_yml(node)
     rescue
@@ -23,7 +25,7 @@ class Chef::ResourceDefinitionList::NodesHelper
 
     unless instances.nil?
       instances.each do |name, instance|
-        cluster_name = instance["cluster"]+"_"+instance["instance"]
+        new_cluster_name = instance["cluster"]+"_"+instance["instance"]
         if cluster_name.nil?
           cluster_name = new_cluster_name
         else
