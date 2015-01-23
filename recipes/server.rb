@@ -189,3 +189,143 @@ template "my.cnf" do
   mode "0644"
 #  notifies :restart, "service[mysql]", :delayed
 end
+
+Chef::Log.info "Configuring cluster specified in yml file ..."
+
+#Making a libary call to read yml file and see if there are any members
+cluster_ready,cluster_name,members = Chef::ResourceDefinitionList::NodesHelper.cluster_members(node)
+
+my_ip = node['ipaddress']
+
+if cluster_ready
+  hosts = []
+  members.each do |member|
+    ipaddress = member["ipaddress"]
+    fqdn = member["fqdn"]
+    hostname = member["hostname"]
+    port = member["port"]
+    hosts << ipaddress
+  end
+
+  node.override['wsrep']['cluster_name'] = cluster_name
+  #For the init host, we take the first node of the array
+  init_host = hosts[0]
+  sync_host = init_host
+
+else
+
+  Chef::Log.warn "***********************************"
+  Chef::Log.warn "There are no nodes found for the cluster ..."
+  #Chef::Log.warn "File exit status set at 185 ..."
+  Chef::Log.warn "***********************************"
+
+  #file "/tmp/file_exit_status" do
+  #  content "185"
+  #  owner 'root'
+  #  group 'root'
+  #  mode '444'
+
+  #end
+
+  hosts = nil
+
+end
+
+Chef::Log.info "init_host = #{init_host}, my_ip = #{my_ip}, hosts = #{hosts}"
+if File.exists?("#{install_flag}") && hosts != nil && hosts.length > 0
+  i = 0
+  begin
+    sync_host = hosts[rand(hosts.count)]
+    i += 1
+    if (i > hosts.count)
+      # no host found, use init node/host
+      sync_host = init_host
+      break
+    end
+  end while my_ip == sync_host
+end
+
+wsrep_cluster_address = 'gcomm://'
+if !File.exists?("#{install_flag}") && hosts != nil && hosts.length > 0
+  hosts.each do |h|
+    wsrep_cluster_address += "#{h}:#{node['wsrep']['port']},"
+  end
+  wsrep_cluster_address = wsrep_cluster_address[0..-2]
+end
+
+Chef::Log.info "wsrep_cluster_address = #{wsrep_cluster_address}"
+bash "set-wsrep-cluster-address" do
+  user "root"
+  code <<-EOH
+  sed -i 's#.*wsrep_cluster_address.*=.*#wsrep_cluster_address=#{wsrep_cluster_address}#' #{node['mysql']['conf_dir']}/my.cnf
+  EOH
+  only_if { (node["galera"]['update_wsrep_urls'] == 'yes') || !FileTest.exists?("#{install_flag}") }
+end
+
+service "init-cluster" do
+  service_name node['mysql']['servicename']
+  supports :start => true
+  start_command "service #{node['mysql']['servicename']} start --wsrep-cluster-address=gcomm://"
+  action [:enable, :start]
+  only_if { my_ip == init_host && !FileTest.exists?("#{install_flag}") }
+end
+
+if my_ip != init_host && !File.exists?("#{install_flag}")
+Chef::Log.info "Joiner node sleeping 30 seconds to make sure donor node is up..."
+sleep(node['xtra']['sleep'])
+Chef::Log.info "Joiner node cluster address = gcomm://#{sync_host}:#{node['wsrep']['port']}"
+end
+
+service "join-cluster" do
+  service_name node['mysql']['servicename']
+  supports :restart => true, :start => true, :stop => true
+  action [:enable, :start]
+  only_if { my_ip != init_host && !FileTest.exists?("#{install_flag}") }
+end
+
+bash "wait-until-synced" do
+  user "root"
+  code <<-EOH
+    state=0
+    cnt=0
+    until [[ "$state" == "4" || "$cnt" > 5 ]]
+    do
+      state=$(#{node['mysql']['mysql_bin']} -uroot -h127.0.0.1 -e "SET wsrep_on=0; SHOW GLOBAL STATUS LIKE 'wsrep_local_state'")
+      state=$(echo "$state"  | tr '\n' ' ' | awk '{print $4}')
+      cnt=$(($cnt + 1))
+      sleep 1
+    done
+  EOH
+  only_if { my_ip == init_host && !FileTest.exists?("#{install_flag}") }
+end
+
+bash "set-wsrep-grants-mysqldump" do
+  user "root"
+  code <<-EOH
+    #{node['mysql']['mysql_bin']} -uroot -h127.0.0.1 -e "GRANT ALL ON *.* TO '#{node['wsrep']['user']}'@'%' IDENTIFIED BY '#{node['wsrep']['password']}'"
+    #{node['mysql']['mysql_bin']} -uroot -h127.0.0.1 -e "SET wsrep_on=0; GRANT ALL ON *.* TO '#{node['wsrep']['user']}'@'127.0.0.1' IDENTIFIED BY '#{node['wsrep']['password']}'"
+  EOH
+  only_if { my_ip == init_host && (node['galera']['sst_method'] == 'mysqldump') && !FileTest.exists?("#{install_flag}") }
+end
+
+bash "secure-mysql" do
+  user "root"
+  code <<-EOH
+    #{node['mysql']['mysql_bin']} -uroot -h127.0.0.1 -e "DROP DATABASE IF EXISTS test; DELETE FROM mysql.db WHERE DB='test' OR DB='test\\_%'"
+    #{node['mysql']['mysql_bin']} -uroot -h127.0.0.1 -e "UPDATE mysql.user SET Password=PASSWORD('#{node['mysql']['root_password']}') WHERE User='root'; DELETE FROM mysql.user WHERE User=''; DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1'); FLUSH PRIVILEGES;"
+  EOH
+  only_if { my_ip == init_host && (node['galera']['secure'] == 'yes') && !FileTest.exists?("#{install_flag}") }
+end
+
+service "mysql" do
+  supports :restart => true, :start => true, :stop => true
+  service_name node['mysql']['servicename']
+  action :nothing
+  only_if { FileTest.exists?("#{install_flag}") }
+end
+
+execute "s9s-galera-installed" do
+  command "touch #{install_flag}"
+  action :run
+  not_if { FileTest.exists?("#{install_flag}") }
+end
