@@ -22,7 +22,7 @@ e = execute "apt-get update" do
 end
 
 apt_repository "mariadb" do
-  uri "http://mirror3.layerjet.com/mariadb/repo/5.5/debian"
+  uri " http://mirror.jmu.edu/pub/mariadb/repo/5.5/ubuntu"
   distribution node['lsb']['codename']
   components ["main"]
   keyserver "keyserver.ubuntu.com"
