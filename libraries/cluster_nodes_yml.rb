@@ -7,7 +7,9 @@ class Chef::ResourceDefinitionList::NodesHelper
   def self.read_yml(node)
     yaml_file = node["shared"]["config"]["nodes_file"]
     raw_config = File.read(yaml_file)
-    instances = YAML.load(raw_config)
+    instances_unsorted = YAML.load(raw_config)
+    instances = instances_unsorted.sort {|a,b| a[:name] <=> b[:name]}
+    return instances
   end
 
   def self.cluster_members(node)

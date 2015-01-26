@@ -12,10 +12,7 @@ innodb_autoinc_lock_mode = <%= node['mysql']['tunable']['autoinc_lock_mode'] %>
 #galera settings
 
 wsrep_provider = <%= node['wsrep']['provider'] %>
-wsrep_cluster_name=<%= node['wsrep']['cluster_name'] %>
-wsrep_sst_method=<%= node['wsrep']['sst_method'] %>
-wsrep_cluster_address=<%= @cluster_nodes %>;
-
-
-
+wsrep_sst_method = <%= node['wsrep']['sst_method'] %>
+wsrep_cluster_name = "<%= node['wsrep']['cluster_name'] %>"
+wsrep_cluster_address = "gcomm://<%= node['wsrep']['cluster_nodes'] %>"
 
