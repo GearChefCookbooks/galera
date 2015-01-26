@@ -34,7 +34,7 @@ if node['platform'] == "ubuntu"
 end
 
 %w{python-software-properties
-mariadb-server
+mariadb-galera-server-5.5
 }.each do |pkg|
   package pkg do
     action :install
