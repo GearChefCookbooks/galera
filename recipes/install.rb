@@ -42,44 +42,17 @@ mariadb-galera-server-5.5
   end
 end
 
-#Chef::Log.info "Configuring cluster specified in yml file ..."
-#
-##Making a libary call to read yml file and see if there are any members
-#cluster_ready,cluster_name,members = Chef::ResourceDefinitionList::NodesHelper.cluster_members(node)
-#
-#my_ip = node['ipaddress']
-#
-#if cluster_ready
-#  hosts = []
-#  members.each do |member|
-#    ipaddress = member["ipaddress"]
-#    fqdn = member["fqdn"]
-#    hostname = member["hostname"]
-#    port = member["port"]
-#    hosts << ipaddress
-#  end
-#
-#  node.override['wsrep']['cluster_name'] = cluster_name
-#  #For the init host, we take the first node of the array
-#  init_host = hosts[0]
-#  sync_host = init_host
-#
-#else
-#
-#  Chef::Log.warn "***********************************"
-#  Chef::Log.warn "There are no nodes found for the cluster ..."
-#  #Chef::Log.warn "File exit status set at 185 ..."
-#  Chef::Log.warn "***********************************"
-#
-#  #file "/tmp/file_exit_status" do
-#  #  content "185"
-#  #  owner 'root'
-#  #  group 'root'
-#  #  mode '444'
-#
-#  #end
-#
-#  hosts = nil
-#
-#end
+template "/etc/mysql/my.cnf" do
+  source "my.erb"
+  owner "root"
+  group "root"
+  mode "755"
+end
+
+bash "restart_mysql" do
+  user "root"
+  code <<-EOH
+    service mysql restart
+  EOH
+end
 

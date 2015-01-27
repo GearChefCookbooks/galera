@@ -5,7 +5,7 @@
 default-storage-engine=innodb
 query_cache_size=0
 query_cache_type=0
-bind-address=0.0.0.0
+bind-address = <%= node['mysql']['tunable']['bind_address'] %>
 binlog_format = <%= node['mysql']['tunable']['binlog_format'] %>
 innodb_autoinc_lock_mode = <%= node['mysql']['tunable']['autoinc_lock_mode'] %>
 

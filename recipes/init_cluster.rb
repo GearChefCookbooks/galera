@@ -39,8 +39,8 @@ if cluster_ready
 
   template "/etc/mysql/conf.d/galera.cnf" do
     source "galera.erb"
-    owner "mysql"
-    group "mysql"
+    owner "root"
+    group "root"
     mode "755"
   end
 

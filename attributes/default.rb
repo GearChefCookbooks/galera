@@ -5,10 +5,12 @@
 # Copyright 2014, Gary Leong
 default['mysql']['tunable']['binlog_format'] = "ROW"
 default['mysql']['tunable']['autoinc_lock_mode'] = 2
+default['mysql']['tunable']['bind_address'] = "0.0.0.0"
 default['wsrep']['provider'] = "/usr/lib/galera/libgalera_smm.so"
 default['wsrep']['cluster_name'] = "my_galera_cluster"
 default['wsrep']['cluster_nodes'] = "127.0.0.1"
 default['wsrep']['sst_method'] = "rsync"
+
 #May want to add the below at some point
 #default['mysql']['root_password'] = "password"
 #default['mysql']['port']    = 3306
