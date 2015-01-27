@@ -1,3 +1,4 @@
+name             'galera'
 maintainer       "Gary Leong"
 maintainer_email "gwleong@gmail.com"
 license          "Apache 2.0"
