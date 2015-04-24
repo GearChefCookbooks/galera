@@ -33,6 +33,15 @@ if node['platform'] == "ubuntu"
   e.run_action(:run)
 end
 
+%w{
+libmariadbclient-dev
+libmariadbd-dev
+}.each do |pkg|
+  package pkg do
+    action :install
+  end
+end
+
 %w{python-software-properties
 mariadb-galera-server-5.5
 }.each do |pkg|
