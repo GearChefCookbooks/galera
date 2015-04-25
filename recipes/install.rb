@@ -17,12 +17,20 @@
 # limitations under the License.
 #
 
+%w{
+software-properties-common
+}.each do |pkg|
+  package pkg do
+    action :install
+  end
+end
+
 e = execute "apt-get update" do
   action :nothing
 end
 
 apt_repository "mariadb" do
-  uri " http://mirror.jmu.edu/pub/mariadb/repo/5.5/ubuntu"
+  uri " http://mirror.stshosting.co.uk/mariadb/repo/5.5/ubuntu"
   distribution node['lsb']['codename']
   components ["main"]
   keyserver "keyserver.ubuntu.com"
@@ -33,17 +41,7 @@ if node['platform'] == "ubuntu"
   e.run_action(:run)
 end
 
-%w{
-libmariadbclient-dev
-libmariadbd-dev
-}.each do |pkg|
-  package pkg do
-    action :install
-  end
-end
-
-%w{python-software-properties
-mariadb-galera-server-5.5
+%w{mariadb-server
 }.each do |pkg|
   package pkg do
     action :install
