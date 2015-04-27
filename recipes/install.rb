@@ -55,10 +55,17 @@ bash 'install_mariadb' do
   code <<-EOH
   apt-get install software-properties-common -y
   apt-key adv --recv-keys --keyserver hkp://keyserver.ubuntu.com:80 0xcbcb082a1bb943db
-  add-apt-repository ‘deb http://mirror.stshosting.co.uk/mariadb/repo/5.5/ubuntu #{node["lsb"]["codename"]} main
+  add-apt-repository ‘deb http://mirror.stshosting.co.uk/mariadb/repo/5.5/ubuntu precise main
   apt-get update
-  apt-get install mariadb-server -y
   EOH
+end
+
+%w{mariadb-server
+}.each do |pkg|
+  package pkg do
+    action :install
+    options "--no-install-recommends"
+  end
 end
 
 template "/etc/mysql/my.cnf" do
