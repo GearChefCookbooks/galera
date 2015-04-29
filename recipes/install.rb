@@ -74,11 +74,13 @@ libmysqlclient18_5.5.42+maria-1~trusty_amd64.deb
   provider Chef::Provider::Package::Dpkg
   source "/tmp/#{pkg}"
   action :install
+  ignore_failure true
   end
 end
 
 execute "reconfigure_maria_depends" do
   command "apt-get install libaio1 iproute -y"
+  ignore_failure true
 end
 
 %w{
@@ -92,6 +94,7 @@ mariadb-galera-server-5.5_5.5.42+maria-1~trusty_amd64.deb
   provider Chef::Provider::Package::Dpkg
   source "/tmp/#{pkg}"
   action :install
+  ignore_failure true
   end
 end
 
