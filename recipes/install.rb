@@ -29,6 +29,12 @@ end
 
 %w{python-software-properties
 software-properties-common
+mysql-common
+libreadline5
+libdbi-perl
+libdbd-mysql-perl
+libaio1
+iproute
 }.each do |pkg|
   package pkg do
     action :install
@@ -36,13 +42,12 @@ software-properties-common
   end
 end
 
-#libmariadbclient-dev_5.5.42+maria-1~trusty_amd64.deb
-#galera-3_25.3.9-precise_amd64.deb
 %w{
 mariadb-common_5.5.42+maria-1~trusty_all.deb
+libmariadbclient18_5.5.42+maria-1~trusty_amd64.deb
+libmysqlclient18_5.5.42+maria-1~trusty_amd64.deb
 mariadb-client-core-5.5_5.5.42+maria-1~trusty_amd64.deb
 mariadb-client_5.5.42+maria-1~trusty_all.deb
-libmariadbclient18_5.5.42+maria-1~trusty_amd64.deb
 mariadb-client-5.5_5.5.42+maria-1~trusty_amd64.deb
 mariadb-galera-server-5.5_5.5.42+maria-1~trusty_amd64.deb
 }.each do |pkg|
@@ -51,6 +56,25 @@ mariadb-galera-server-5.5_5.5.42+maria-1~trusty_amd64.deb
     mode '0644'
   end
 end
+
+%w{galera-3_25.3.9-trusty_amd64.deb
+}.each do |pkg|
+  remote_file "/tmp/#{pkg}" do
+    source "http://ftp.osuosl.org/pub/mariadb/repo/5.5/ubuntu/pool/main/g/galera-3/#{pkg}"
+    mode '0644'
+  end
+end
+
+
+#mariadb-common                    5.5.42+maria-1~trusty         all          MariaDB database common files (e.g. /etc/mysql/conf.d/mariadb.cnf)
+#libmariadbclient18                5.5.42+maria-1~trusty         amd64        MariaDB database client library
+#libmysqlclient18                  5.5.42+maria-1~trusty         amd64        Virtual package to satisfy external depends
+#mariadb-client-5.5                5.5.42+maria-1~trusty         amd64        MariaDB database client binaries
+#mariadb-client-core-5.5           5.5.42+maria-1~trusty         amd64        MariaDB database core client binaries
+#mariadb-galera-server-5.5         5.5.42+maria-1~trusty         amd64        MariaDB database server with Galera cluster binaries
+
+
+
 
 #apt_repository "mariadb" do
 #  url "http://ftp.osuosl.org/pub/mariadb/repo/5.5/ubuntu/"
