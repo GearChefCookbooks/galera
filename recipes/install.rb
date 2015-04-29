@@ -22,7 +22,6 @@
 #libmariadbclient-dev_5.5.42+maria-1~trusty_amd64.deb  mariadb-client-core-5.5_5.5.42+maria-1~trusty_amd64.deb
 #http://ftp.osuosl.org/pub/mariadb/repo/5.5/ubuntu/pool/main/m/mariadb-5.5/
 
-
 e = execute "apt-get update" do
   action :nothing
 end
@@ -47,8 +46,8 @@ mariadb-common_5.5.42+maria-1~trusty_all.deb
 libmariadbclient18_5.5.42+maria-1~trusty_amd64.deb
 libmysqlclient18_5.5.42+maria-1~trusty_amd64.deb
 mariadb-client-core-5.5_5.5.42+maria-1~trusty_amd64.deb
-mariadb-client_5.5.42+maria-1~trusty_all.deb
 mariadb-client-5.5_5.5.42+maria-1~trusty_amd64.deb
+mariadb-client_5.5.42+maria-1~trusty_all.deb
 mariadb-galera-server-5.5_5.5.42+maria-1~trusty_amd64.deb
 }.each do |pkg|
   remote_file "/tmp/#{pkg}" do
@@ -65,6 +64,36 @@ end
   end
 end
 
+
+%w{
+mariadb-common_5.5.42+maria-1~trusty_all.deb
+libmariadbclient18_5.5.42+maria-1~trusty_amd64.deb
+libmysqlclient18_5.5.42+maria-1~trusty_amd64.deb
+}.each do |pkg|
+  package "#{pkg}" do
+  provider Chef::Provider::Package::Dpkg
+  source "/tmp/#{pkg}"
+  action :install
+  end
+end
+
+execute "reconfigure_maria_depends" do
+  command "apt-get install libaio1 iproute -y"
+end
+
+%w{
+mariadb-client-core-5.5_5.5.42+maria-1~trusty_amd64.deb
+mariadb-client-5.5_5.5.42+maria-1~trusty_amd64.deb
+mariadb-client_5.5.42+maria-1~trusty_all.deb
+galera-3_25.3.9-trusty_amd64.deb
+mariadb-galera-server-5.5_5.5.42+maria-1~trusty_amd64.deb
+}.each do |pkg|
+  package "#{pkg}" do
+  provider Chef::Provider::Package::Dpkg
+  source "/tmp/#{pkg}"
+  action :install
+  end
+end
 
 #mariadb-common                    5.5.42+maria-1~trusty         all          MariaDB database common files (e.g. /etc/mysql/conf.d/mariadb.cnf)
 #libmariadbclient18                5.5.42+maria-1~trusty         amd64        MariaDB database client library
