@@ -98,16 +98,6 @@ mariadb-galera-server-5.5_5.5.42+maria-1~trusty_amd64.deb
   end
 end
 
-#mariadb-common                    5.5.42+maria-1~trusty         all          MariaDB database common files (e.g. /etc/mysql/conf.d/mariadb.cnf)
-#libmariadbclient18                5.5.42+maria-1~trusty         amd64        MariaDB database client library
-#libmysqlclient18                  5.5.42+maria-1~trusty         amd64        Virtual package to satisfy external depends
-#mariadb-client-5.5                5.5.42+maria-1~trusty         amd64        MariaDB database client binaries
-#mariadb-client-core-5.5           5.5.42+maria-1~trusty         amd64        MariaDB database core client binaries
-#mariadb-galera-server-5.5         5.5.42+maria-1~trusty         amd64        MariaDB database server with Galera cluster binaries
-
-
-
-
 #apt_repository "mariadb" do
 #  url "http://ftp.osuosl.org/pub/mariadb/repo/5.5/ubuntu/"
 #  distribution node['lsb']['codename']
@@ -128,21 +118,18 @@ end
 #  end
 #end
 
+template "/etc/mysql/my.cnf" do
+  source "my.erb"
+  owner "root"
+  group "root"
+  mode "755"
+end
 
+bash "restart_mysql" do
+  user "root"
+  code <<-EOH
+    service mysql restart
+  EOH
+end
 
-
-#template "/etc/mysql/my.cnf" do
-#  source "my.erb"
-#  owner "root"
-#  group "root"
-#  mode "755"
-#end
-#
-#bash "restart_mysql" do
-#  user "root"
-#  code <<-EOH
-#    service mysql restart
-#  EOH
-#end
-#
 
