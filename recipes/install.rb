@@ -2,7 +2,7 @@
 # Cookbook Name:: galera
 # Recipe:: galera_install
 #
-# Copyright 2014, Gary Leong
+# Copyright 2015, Gary Leong
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,21 +17,14 @@
 # limitations under the License.
 #
 
+#galera-3_25.3.9-precise_amd64.deb                     mariadb-client_5.5.42+maria-1~trusty_all.deb             mariadb-common_5.5.42+maria-1~trusty_all.deb
+#libmariadbclient18_5.5.42+maria-1~trusty_amd64.deb    mariadb-client-5.5_5.5.42+maria-1~trusty_amd64.deb       mariadb-galera-server-5.5_5.5.42+maria-1~trusty_amd64.deb
+#libmariadbclient-dev_5.5.42+maria-1~trusty_amd64.deb  mariadb-client-core-5.5_5.5.42+maria-1~trusty_amd64.deb
+#http://ftp.osuosl.org/pub/mariadb/repo/5.5/ubuntu/pool/main/m/mariadb-5.5/
+
 
 e = execute "apt-get update" do
   action :nothing
-end
-
-apt_repository "mariadb" do
-  uri " http://mirror.jmu.edu/pub/mariadb/repo/5.5/ubuntu"
-  distribution node['lsb']['codename']
-  components ["main"]
-  keyserver "keyserver.ubuntu.com"
-  key "0xcbcb082a1bb943db"
-end
-
-if node['platform'] == "ubuntu"
-  e.run_action(:run)
 end
 
 %w{python-software-properties
@@ -43,26 +36,57 @@ software-properties-common
   end
 end
 
-%w{mariadb-galera-server-5.5
+#libmariadbclient-dev_5.5.42+maria-1~trusty_amd64.deb
+#galera-3_25.3.9-precise_amd64.deb
+%w{
+mariadb-common_5.5.42+maria-1~trusty_all.deb
+mariadb-client-core-5.5_5.5.42+maria-1~trusty_amd64.deb
+mariadb-client_5.5.42+maria-1~trusty_all.deb
+libmariadbclient18_5.5.42+maria-1~trusty_amd64.deb
+mariadb-client-5.5_5.5.42+maria-1~trusty_amd64.deb
+mariadb-galera-server-5.5_5.5.42+maria-1~trusty_amd64.deb
 }.each do |pkg|
-  package pkg do
-    action :install
-    options "--no-install-recommends"
+  remote_file "/tmp/#{pkg}" do
+    source "http://ftp.osuosl.org/pub/mariadb/repo/5.5/ubuntu/pool/main/m/mariadb-5.5/#{pkg}"
+    mode '0644'
   end
 end
 
-template "/etc/mysql/my.cnf" do
-  source "my.erb"
-  owner "root"
-  group "root"
-  mode "755"
-end
+#apt_repository "mariadb" do
+#  url "http://ftp.osuosl.org/pub/mariadb/repo/5.5/ubuntu/"
+#  distribution node['lsb']['codename']
+#  components ["main"]
+#  keyserver "keyserver.ubuntu.com"
+#  key "0xcbcb082a1bb943db"
+#end
+#
+#if node['platform'] == "ubuntu"
+#  e.run_action(:run)
+#end
+#
+#%w{mariadb-galera-server-5.5
+#}.each do |pkg|
+#  package pkg do
+#    action :install
+#    options "--no-install-recommends"
+#  end
+#end
 
-bash "restart_mysql" do
-  user "root"
-  code <<-EOH
-    service mysql restart
-  EOH
-end
 
+
+
+#template "/etc/mysql/my.cnf" do
+#  source "my.erb"
+#  owner "root"
+#  group "root"
+#  mode "755"
+#end
+#
+#bash "restart_mysql" do
+#  user "root"
+#  code <<-EOH
+#    service mysql restart
+#  EOH
+#end
+#
 
