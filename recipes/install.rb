@@ -21,10 +21,6 @@ e = execute "apt-get update" do
   action :nothing
 end
 
-
-deb http://ftp.osuosl.org/pub/mariadb/mariadb-5.5.32/repo/{os} {dist} main
-
-
 apt_repository "mariadb" do
   url " http://ftp.osuosl.org/pub/mariadb/mariadb-5.5.32/repo/ubuntu"
   distribution node['lsb']['codename']
