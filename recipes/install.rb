@@ -22,7 +22,7 @@ e = execute "apt-get update" do
 end
 
 apt_repository "mariadb" do
-  url " http://ftp.osuosl.org/pub/mariadb/mariadb-5.5.32/repo/ubuntu"
+  uri "http://ftp.osuosl.org/pub/mariadb/mariadb-5.5.32/repo/ubuntu"
   distribution node['lsb']['codename']
   components ["main"]
   keyserver "keyserver.ubuntu.com"
