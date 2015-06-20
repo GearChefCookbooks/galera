@@ -2,7 +2,7 @@
 # Cookbook Name:: galera
 # Recipe:: galera_install
 #
-# Copyright 2015, Gary Leong
+# Copyright 2014, Gary Leong
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,106 +17,34 @@
 # limitations under the License.
 #
 
-#galera-3_25.3.9-precise_amd64.deb                     mariadb-client_5.5.42+maria-1~trusty_all.deb             mariadb-common_5.5.42+maria-1~trusty_all.deb
-#libmariadbclient18_5.5.42+maria-1~trusty_amd64.deb    mariadb-client-5.5_5.5.42+maria-1~trusty_amd64.deb       mariadb-galera-server-5.5_5.5.42+maria-1~trusty_amd64.deb
-#libmariadbclient-dev_5.5.42+maria-1~trusty_amd64.deb  mariadb-client-core-5.5_5.5.42+maria-1~trusty_amd64.deb
-#http://ftp.osuosl.org/pub/mariadb/repo/5.5/ubuntu/pool/main/m/mariadb-5.5/
-
 e = execute "apt-get update" do
   action :nothing
 end
 
+
+deb http://ftp.osuosl.org/pub/mariadb/mariadb-5.5.32/repo/{os} {dist} main
+
+
+apt_repository "mariadb" do
+  url " http://ftp.osuosl.org/pub/mariadb/mariadb-5.5.32/repo/ubuntu"
+  distribution node['lsb']['codename']
+  components ["main"]
+  keyserver "keyserver.ubuntu.com"
+  key "0xcbcb082a1bb943db"
+end
+
+if node['platform'] == "ubuntu"
+  e.run_action(:run)
+end
+
 %w{python-software-properties
-software-properties-common
-mysql-common
-libreadline5
-libdbi-perl
-libdbd-mysql-perl
-libaio1
-iproute
+mariadb-galera-server-5.5
 }.each do |pkg|
   package pkg do
     action :install
     options "--no-install-recommends"
   end
 end
-
-%w{
-mariadb-common_5.5.42+maria-1~trusty_all.deb
-libmariadbclient18_5.5.42+maria-1~trusty_amd64.deb
-libmysqlclient18_5.5.42+maria-1~trusty_amd64.deb
-mariadb-client-core-5.5_5.5.42+maria-1~trusty_amd64.deb
-mariadb-client-5.5_5.5.42+maria-1~trusty_amd64.deb
-mariadb-client_5.5.42+maria-1~trusty_all.deb
-mariadb-galera-server-5.5_5.5.42+maria-1~trusty_amd64.deb
-}.each do |pkg|
-  remote_file "/tmp/#{pkg}" do
-    source "http://ftp.osuosl.org/pub/mariadb/repo/5.5/ubuntu/pool/main/m/mariadb-5.5/#{pkg}"
-    mode '0644'
-  end
-end
-
-%w{galera-3_25.3.9-trusty_amd64.deb
-}.each do |pkg|
-  remote_file "/tmp/#{pkg}" do
-    source "http://ftp.osuosl.org/pub/mariadb/repo/5.5/ubuntu/pool/main/g/galera-3/#{pkg}"
-    mode '0644'
-  end
-end
-
-
-%w{
-mariadb-common_5.5.42+maria-1~trusty_all.deb
-libmariadbclient18_5.5.42+maria-1~trusty_amd64.deb
-libmysqlclient18_5.5.42+maria-1~trusty_amd64.deb
-}.each do |pkg|
-  package "#{pkg}" do
-  provider Chef::Provider::Package::Dpkg
-  source "/tmp/#{pkg}"
-  action :install
-  ignore_failure true
-  end
-end
-
-execute "reconfigure_maria_depends" do
-  command "apt-get install libaio1 iproute -y"
-  ignore_failure true
-end
-
-%w{
-mariadb-client-core-5.5_5.5.42+maria-1~trusty_amd64.deb
-mariadb-client-5.5_5.5.42+maria-1~trusty_amd64.deb
-mariadb-client_5.5.42+maria-1~trusty_all.deb
-galera-3_25.3.9-trusty_amd64.deb
-mariadb-galera-server-5.5_5.5.42+maria-1~trusty_amd64.deb
-}.each do |pkg|
-  package "#{pkg}" do
-  provider Chef::Provider::Package::Dpkg
-  source "/tmp/#{pkg}"
-  action :install
-  ignore_failure true
-  end
-end
-
-#apt_repository "mariadb" do
-#  url "http://ftp.osuosl.org/pub/mariadb/repo/5.5/ubuntu/"
-#  distribution node['lsb']['codename']
-#  components ["main"]
-#  keyserver "keyserver.ubuntu.com"
-#  key "0xcbcb082a1bb943db"
-#end
-#
-#if node['platform'] == "ubuntu"
-#  e.run_action(:run)
-#end
-#
-#%w{mariadb-galera-server-5.5
-#}.each do |pkg|
-#  package pkg do
-#    action :install
-#    options "--no-install-recommends"
-#  end
-#end
 
 template "/etc/mysql/my.cnf" do
   source "my.erb"
@@ -131,5 +59,4 @@ bash "restart_mysql" do
     service mysql restart
   EOH
 end
-
 
