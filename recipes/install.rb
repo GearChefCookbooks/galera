@@ -52,7 +52,7 @@ end
 bash "restart_mysql" do
   user "root"
   code <<-EOH
-    service mysql restart
+    service mysql restart > /dev/null 2>&1
   EOH
 end
 
