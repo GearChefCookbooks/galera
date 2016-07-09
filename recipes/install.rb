@@ -50,11 +50,7 @@ template "/etc/mysql/my.cnf" do
 end
 
 execute 'stop_mysql' do
-  command 'service mysql stop'
-end
-
-execute 'start_mysql' do
-  command 'service mysql start'
+  command 'service mysql restart'
 end
 
 #bash "restart_mysql" do
