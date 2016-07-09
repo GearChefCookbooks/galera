@@ -49,8 +49,12 @@ template "/etc/mysql/my.cnf" do
   mode "755"
 end
 
-execute 'restart_mysql' do
-  command 'service mysql restart'
+execute 'stop_mysql' do
+  command 'service mysql stop'
+end
+
+execute 'start_mysql' do
+  command 'service mysql start'
 end
 
 #bash "restart_mysql" do
