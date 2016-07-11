@@ -49,9 +49,11 @@ template "/etc/mysql/my.cnf" do
   mode "755"
 end
 
-execute 'stop_mysql' do
-  command 'service mysql restart'
-end
+#Restart mysql doesn't work with Chef 12, though it worked with Chef 11 when 
+#called by the subprocess module within jiffy - weird. 
+#execute 'stop_mysql' do
+#  command 'service mysql restart'
+#end
 
 #bash "restart_mysql" do
 #  user "root"
